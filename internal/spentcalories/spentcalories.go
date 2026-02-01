@@ -9,13 +9,10 @@ import (
 	"time"
 )
 
-// Основные константы, необходимые для расчетов.
 const (
-	lenStep                    = 0.65 // средняя длина шага.
-	mInKm                      = 1000 // количество метров в километре.
-	minInH                     = 60   // количество минут в часе.
-	stepLengthCoefficient      = 0.45 // коэффициент для расчета длины шага на основе роста.
-	walkingCaloriesCoefficient = 0.5  // коэффициент для расчета калорий при ходьбе
+	stepLength = 0.65
+	mInKm      = 1000
+	minInH     = 60
 )
 
 func parseTraining(data string) (int, string, time.Duration, error) {
@@ -37,26 +34,42 @@ func parseTraining(data string) (int, string, time.Duration, error) {
 	return steps, parts[1], duration, nil
 }
 
-
-
 func distance(steps int, height float64) float64 {
-	stepLen := 0.65 
-	return float64(steps) * stepLen / mInKm
+	if steps <= 0 {
+		return 0
+	}
+	return float64(steps) * stepLength / mInKm
 }
-
-
-
 
 func meanSpeed(steps int, height float64, duration time.Duration) float64 {
 	if steps <= 0 || duration <= 0 {
 		return 0
 	}
-
-	dist := distance(steps, height)
-	return dist / duration.Hours()
+	hours := duration.Hours()
+	return distance(steps, height) / hours
 }
 
+func RunningSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
+	if steps <= 0 || weight <= 0 || height <= 0 || duration <= 0 {
+		return 0, errors.New("некорректные входные данные")
+	}
 
+	speed := meanSpeed(steps, height, duration)
+	minutes := duration.Minutes()
+
+	return (weight * speed * minutes) / minInH, nil
+}
+
+func WalkingSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
+	if steps <= 0 || weight <= 0 || height <= 0 || duration <= 0 {
+		return 0, errors.New("некорректные входные данные")
+	}
+
+	speed := meanSpeed(steps, height, duration)
+	minutes := duration.Minutes()
+
+	return (weight * speed * minutes) / minInH, nil
+}
 
 func TrainingInfo(data string, weight, height float64) (string, error) {
 	steps, activity, duration, err := parseTraining(data)
@@ -65,26 +78,16 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 		return "", err
 	}
 
-	// 🔥 НОРМАЛИЗАЦИЯ ТИПА ТРЕНИРОВКИ
-	switch activity {
-	case "Бег":
-		activity = "running"
-	case "Ходьба":
-		activity = "walking"
-	}
-
 	var (
-		dist     = distance(steps, height)
-		speed    = meanSpeed(steps, height, duration)
-		calories float64
 		name     string
+		calories float64
 	)
 
 	switch activity {
-	case "running":
+	case "Бег":
 		name = "Бег"
 		calories, err = RunningSpentCalories(steps, weight, height, duration)
-	case "walking":
+	case "Ходьба":
 		name = "Ходьба"
 		calories, err = WalkingSpentCalories(steps, weight, height, duration)
 	default:
@@ -95,42 +98,15 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 		return "", err
 	}
 
+	dist := distance(steps, height)
+	speed := meanSpeed(steps, height, duration)
+
 	return fmt.Sprintf(
-		"Тип тренировки: %s\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f",
+		"Тип тренировки: %s\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f\n",
 		name,
 		duration.Hours(),
 		dist,
 		speed,
 		calories,
 	), nil
-}
-
-
-
-
-func RunningSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
-	if steps <= 0 || weight <= 0 || height <= 0 || duration <= 0 {
-		return 0, errors.New("некорректные входные данные")
-	}
-
-	speed := meanSpeed(steps, height, duration)
-	minutes := duration.Minutes()
-
-	calories := (weight * speed * minutes) / minInH
-	return calories, nil
-}
-
-
-
-
-func WalkingSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
-	if steps <= 0 || weight <= 0 || height <= 0 || duration <= 0 {
-		return 0, errors.New("некорректные входные данные")
-	}
-
-	speed := meanSpeed(steps, height, duration)
-	minutes := duration.Minutes()
-
-	calories := (weight * speed * minutes) / minInH
-	return calories * walkingCaloriesCoefficient, nil
 }
