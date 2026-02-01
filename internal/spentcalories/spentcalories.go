@@ -65,6 +65,14 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 		return "", err
 	}
 
+	// 🔥 НОРМАЛИЗАЦИЯ ТИПА ТРЕНИРОВКИ
+	switch activity {
+	case "Бег":
+		activity = "running"
+	case "Ходьба":
+		activity = "walking"
+	}
+
 	var (
 		dist     = distance(steps, height)
 		speed    = meanSpeed(steps, height, duration)
@@ -96,6 +104,7 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 		calories,
 	), nil
 }
+
 
 
 
