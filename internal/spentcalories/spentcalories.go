@@ -10,8 +10,13 @@ import (
 )
 
 const (
-	stepLength = 0.65
-	mInKm      = 1000
+
+	stepLengthCoefficient = 0.45 
+	mInKm                 = 1000
+	minInH                = 60
+
+	runningCaloriesCoefficient = 2.0   
+	walkingCaloriesCoefficient = 1.0   
 )
 
 func parseTraining(data string) (int, string, time.Duration, error) {
@@ -34,7 +39,9 @@ func parseTraining(data string) (int, string, time.Duration, error) {
 }
 
 func distance(steps int, height float64) float64 {
-	return float64(steps) * stepLength / mInKm
+
+	stepLen := height * stepLengthCoefficient
+	return float64(steps) * stepLen / mInKm
 }
 
 func meanSpeed(steps int, height float64, duration time.Duration) float64 {
@@ -52,7 +59,8 @@ func RunningSpentCalories(steps int, weight, height float64, duration time.Durat
 	}
 
 	dist := distance(steps, height)
-	calories := weight * dist * 2.35
+
+	calories := weight * dist * 1.0
 	return calories, nil
 }
 
@@ -62,7 +70,9 @@ func WalkingSpentCalories(steps int, weight, height float64, duration time.Durat
 	}
 
 	dist := distance(steps, height)
-	calories := weight * dist * 1.15
+
+
+	calories := weight * dist * 0.5
 	return calories, nil
 }
 
@@ -73,14 +83,22 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 		return "", err
 	}
 
+
+	switch activity {
+	case "Бег":
+		activity = "running"
+	case "Ходьба":
+		activity = "walking"
+	}
+
 	var name string
 	var calories float64
 
 	switch activity {
-	case "Бег":
+	case "running":
 		name = "Бег"
 		calories, err = RunningSpentCalories(steps, weight, height, duration)
-	case "Ходьба":
+	case "walking":
 		name = "Ходьба"
 		calories, err = WalkingSpentCalories(steps, weight, height, duration)
 	default:
