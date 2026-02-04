@@ -14,9 +14,8 @@ const (
 	stepLengthCoefficient = 0.45 
 	mInKm                 = 1000
 	minInH                = 60
-
-	runningCaloriesCoefficient = 2.0   
-	walkingCaloriesCoefficient = 1.0   
+ 
+	walkingCaloriesCoefficient = 0.5   
 )
 
 func parseTraining(data string) (int, string, time.Duration, error) {
