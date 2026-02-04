@@ -35,9 +35,6 @@ func parseTraining(data string) (int, string, time.Duration, error) {
 }
 
 func distance(steps int, height float64) float64 {
-	if steps <= 0 {
-		return 0
-	}
 	return float64(steps) * stepLength / mInKm
 }
 
@@ -45,8 +42,9 @@ func meanSpeed(steps int, height float64, duration time.Duration) float64 {
 	if steps <= 0 || duration <= 0 {
 		return 0
 	}
+	dist := distance(steps, height)
 	hours := duration.Hours()
-	return distance(steps, height) / hours
+	return dist / hours
 }
 
 func RunningSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
@@ -56,8 +54,8 @@ func RunningSpentCalories(steps int, weight, height float64, duration time.Durat
 
 	speed := meanSpeed(steps, height, duration)
 	minutes := duration.Minutes()
-
-	return (weight * speed * minutes) / minInH, nil
+	calories := (weight * speed * minutes) / minInH
+	return calories, nil
 }
 
 func WalkingSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
@@ -67,8 +65,8 @@ func WalkingSpentCalories(steps int, weight, height float64, duration time.Durat
 
 	speed := meanSpeed(steps, height, duration)
 	minutes := duration.Minutes()
-
-	return (weight * speed * minutes) / minInH, nil
+	calories := (weight * speed * minutes) / minInH
+	return calories, nil
 }
 
 func TrainingInfo(data string, weight, height float64) (string, error) {
@@ -78,10 +76,8 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 		return "", err
 	}
 
-	var (
-		name     string
-		calories float64
-	)
+	var name string
+	var calories float64
 
 	switch activity {
 	case "Бег":
