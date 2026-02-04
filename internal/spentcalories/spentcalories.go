@@ -70,7 +70,9 @@ func WalkingSpentCalories(steps int, weight, height float64, duration time.Durat
 	}
 
 	dist := distance(steps, height)
-	calories := weight * dist * 0.606
+
+
+	calories := weight * dist * 0.5
 	return calories, nil
 }
 
