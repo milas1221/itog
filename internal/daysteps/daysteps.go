@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Yandex-Practicum/tracker/internal/spentcalories"
 )
 
 const (
@@ -44,20 +46,13 @@ func DayActionInfo(data string, weight, height float64) string {
 		return ""
 	}
 
-
 	distanceKm := float64(steps) * stepLength / mInKm
-
-	var coefficient float64
-	if height <= 1.75 {
-		coefficient = 0.605982905982906
-	} else if height >= 1.85 {
-		coefficient = 0.641025641025641
-	} else {
-		// Линейная интерполяция между 1.75 и 1.85
-		coefficient = 0.605982905982906 + (0.641025641025641-0.605982905982906)*(height-1.75)/(1.85-1.75)
+	
+	calories, err := spentcalories.WalkingSpentCalories(steps, weight, height, duration)
+	if err != nil {
+		log.Println(err)
+		return ""
 	}
-
-	calories := weight * distanceKm * coefficient
 
 	return fmt.Sprintf(
 		"Количество шагов: %d.\nДистанция составила %.2f км.\nВы сожгли %.2f ккал.\n",
