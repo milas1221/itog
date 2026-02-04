@@ -12,7 +12,6 @@ import (
 const (
 	stepLength = 0.65
 	mInKm      = 1000
-	minInH     = 60
 )
 
 func parseTraining(data string) (int, string, time.Duration, error) {
@@ -52,9 +51,8 @@ func RunningSpentCalories(steps int, weight, height float64, duration time.Durat
 		return 0, errors.New("некорректные входные данные")
 	}
 
-	speed := meanSpeed(steps, height, duration)
-	minutes := duration.Minutes()
-	calories := (weight * speed * minutes) / minInH
+	dist := distance(steps, height)
+	calories := weight * dist * 2.35
 	return calories, nil
 }
 
@@ -63,9 +61,8 @@ func WalkingSpentCalories(steps int, weight, height float64, duration time.Durat
 		return 0, errors.New("некорректные входные данные")
 	}
 
-	speed := meanSpeed(steps, height, duration)
-	minutes := duration.Minutes()
-	calories := 0.5 * (weight * speed * minutes) / minInH
+	dist := distance(steps, height)
+	calories := weight * dist * 1.15
 	return calories, nil
 }
 
